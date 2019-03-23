@@ -16,9 +16,11 @@ from Personalkit import stock
 #   dtype:设定columns在数据库里的数据类型，默认是None
 
 #调用方法：
-
+from pandas.io import sql
 from sqlalchemy import create_engine
-engine = create_engine('mysql+pymysql://root:Test123@127.0.0.1:3306/test')
+engine = create_engine('mysql+pymysql://root:Test123@127.0.0.1:3306/realtime')
+sql.execute("delete from dtz_block_details where 板块名称=''", engine)
+exit()
 # Create engine
 
 # 管理connnection
