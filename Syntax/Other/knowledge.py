@@ -33,7 +33,7 @@ sex = df.loc[(df.classes==1)&(df.name=='a'),'price'].values[0]
 等到根据条件筛选后行所在索引的位置
 base = df.index.get_indexer_for((df[df.A == 2].index))
 
-
+df3.set_axis(range(1, len(stockcode) + 1), axis=0, inplace=True)  # 在原DATAFRAME中直接修改行索引的编号,起始值为1
 
 
 
@@ -84,3 +84,61 @@ while commandoption >0:
     commandoption=int(input())
 
 print('程序已退出')
+
+
+oldfile=os.listdir(path4)
+print(oldfile)
+for eachfile in oldfile:
+    os.unlink(path4+'/'+eachfile)
+df=pd.read_csv(path3,encoding='gbk',index_col=['股票代码'])
+df1=pd.read_csv(path2,encoding='gbk',index_col=['代码'])
+
+
+file=csv.reader(open(path))
+for i,eachblock in enumerate(file):   #每个板块代码及包含的股票代码
+    stockcode = []
+    stockprirange = []
+    blockcode=eachblock[0]   #板块代码在首位
+    stocks=eachblock[1:]     #板块所在股票代码的集合
+    try:
+        blockname=list(df1.loc[int(blockcode)])[-1]   #block是str 类型,index是整数,因此要转换下
+    except:
+        continue
+    for eachstock in stocks:  #遍历板块中每个股票
+        try:
+            pricerange=list(df.loc[eachstock.lower()])[-3]   # 1)股票名称都小写2)条件: dataframe中等于股票代码所在的行 3) 提取该行所在最后一列即区间涨跌幅
+            stockprirange.append(pricerange)  #添加到stockprirange列表
+            stockcode.append(eachstock)   #添加到stockname列表,位置对应相应的stockprirange
+        except:
+            continue
+    collection={'股票代码':stockcode,'区间涨跌幅':stockprirange}
+    obj=pd.DataFrame(collection,columns=['股票代码','区间涨跌幅'],)
+    obj2=obj.sort_values(by='区间涨跌幅',ascending=False )
+    obj2.set_axis(range(1,len(stockcode)+1), axis=0, inplace=True)   #在原DATAFRAME中直接修改行索引的编号,起始值为1
+    obj2['板块']=blockname
+    obj2.index.name='Seq No'
+    #obj2.head(10).to_csv(path4 + '/'+blockname+'.csv', encoding='gbk')
+    try:
+        obj2.to_csv(path4 + '/' + blockname + '.csv', encoding='gbk')
+    except:
+        print(i,blockcode)
+print(i)
+
+stock_in_block = list(data['股票代码'])
+stockcode = []
+stockname = []
+stockprirange = []
+print(eachblock, stock_in_block, len(stock_in_block))
+for eachstock in stock_in_block:  # 对于每个板块中的股票从阶段涨幅值文件中拿到阶段涨幅值
+    try:
+        pricerange = list(df2.loc[eachstock.lower()])[-3]  # 1)股票名称都小写2)条件: dataframe中等于股票代码所在的行 3) 提取该行所在倒数第3列即区间涨跌幅
+        stockname = list(df2.loc[eachstock.lower()])[1]  # 提取该股票名称
+        stockprirange.append(pricerange)  # 添加到stockprirange列表
+        stockcode.append(eachstock)  # 添加到stockcode列表,位置对应相应的stockprirange
+        stockname.append(stockname)  # 添加到stockname列表,位置对应相应的stockprirange
+    except:
+        print(str(eachstock) + 'has no trading days during the period')
+        continue
+collection = {'股票代码': stockcode, '股票名称': stockname, '区间涨跌幅': stockprirange}
+obj = pd.DataFrame(collection, columns=['股票代码', '股票名称', '区间涨跌幅'], )
+
