@@ -35,7 +35,9 @@ base = df.index.get_indexer_for((df[df.A == 2].index))
 
 df3.set_axis(range(1, len(stockcode) + 1), axis=0, inplace=True)  # 在原DATAFRAME中直接修改行索引的编号,起始值为1
 
-
+df3=data[data['TS股票代码'].isin(ts_codes)] #提取当日涨停股的十大流通股东信息
+df4=df3.groupby(['股东名称'])['股东名称'].agg('count').sort_values(ascending=False)[:5]
+print(df4,df3[df3['股东名称'].isin(df4.index)])
 
 
 import os,pandas as pd
@@ -142,3 +144,24 @@ for eachstock in stock_in_block:  # 对于每个板块中的股票从阶段涨�
 collection = {'股票代码': stockcode, '股票名称': stockname, '区间涨跌幅': stockprirange}
 obj = pd.DataFrame(collection, columns=['股票代码', '股票名称', '区间涨跌幅'], )
 
+601698.SHhas no the newsest report
+300717.SZhas no main business data
+300429.SZhas no main business data
+600119.SHhas no main business data
+600063.SHhas no main business data
+300637.SZhas no main business data
+600587.SHhas no main business data
+300691.SZhas no main business data
+600888.SHhas no main business data
+600095.SHhas no main business data
+601698.SHhas no main business data
+002611.SZhas no main business data
+002407.SZhas no main business data
+600860.SHhas no main business data
+002330.SZhas no main business data
+603168.SHhas no main business data
+300554.SZhas no main business data
+600110.SHhas no main business data
+300689.SZhas no main business data
+600083.SHhas no main business data
+603508.SHhas no main business data
