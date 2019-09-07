@@ -141,27 +141,18 @@ for eachstock in stock_in_block:  # 对于每个板块中的股票从阶段涨�
     except:
         print(str(eachstock) + 'has no trading days during the period')
         continue
+
+# 建立一个dataframe
 collection = {'股票代码': stockcode, '股票名称': stockname, '区间涨跌幅': stockprirange}
 obj = pd.DataFrame(collection, columns=['股票代码', '股票名称', '区间涨跌幅'], )
 
-601698.SHhas no the newsest report
-300717.SZhas no main business data
-300429.SZhas no main business data
-600119.SHhas no main business data
-600063.SHhas no main business data
-300637.SZhas no main business data
-600587.SHhas no main business data
-300691.SZhas no main business data
-600888.SHhas no main business data
-600095.SHhas no main business data
-601698.SHhas no main business data
-002611.SZhas no main business data
-002407.SZhas no main business data
-600860.SHhas no main business data
-002330.SZhas no main business data
-603168.SHhas no main business data
-300554.SZhas no main business data
-600110.SHhas no main business data
+#这样的填空题会让我们印象深刻，当字符串中有多个这样的“空”需要填写的时候，我们可以使用.format（）进行批处理，它的基本使用方法有如下几种，输入代码
+print('{} a word she can get what she {} for.'.format('With','came'))
+print('{preposition} a word she can get what she {verb} for'.format(preposition = 'With',verb = 'came'))
+print('{0} a word she can get what she {1} for.'.format('With','came'))
+
+city = input("write down the name of city:")
+url = "http://apistore.baidu.com/microservice/weather?citypinyin={}".format(city)s no main business data
 300689.SZhas no main business data
 600083.SHhas no main business data
 603508.SHhas no main business data
