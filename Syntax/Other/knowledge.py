@@ -152,7 +152,92 @@ print('{preposition} a word she can get what she {verb} for'.format(preposition 
 print('{0} a word she can get what she {1} for.'.format('With','came'))
 
 city = input("write down the name of city:")
-url = "http://apistore.baidu.com/microservice/weather?citypinyin={}".format(city)s no main business data
-300689.SZhas no main business data
-600083.SHhas no main business data
-603508.SHhas no main business data
+url = "http://apistore.baidu.com/microservice/weather?citypinyin={}".format(city)
+
+counter += 1
+if counter >= 75:
+    print('休息一下:' + str(counter))
+    time.sleep(55)
+    counter = 0
+
+    # code='300232.SZ'
+    # df = pro.balancesheet(ts_code=code,period=each_period, fields='ts_code,ann_date,f_ann_date,end_date,report_type,notes_receiv,accounts_receiv,prepayment,inventories,lt_rec,fix_assets,cip,notes_payable,acct_payable,adv_receipts,lt_payable')
+    # df.fillna('NULL',inplace=True)
+    # for i in range(5,df.columns.size):
+    #   try:
+    #      df.ix[:,i]=df.ix[:,i].apply(lambda x: round(x/10000,2))
+    # except:
+    #    print(str(i)+'has null value')
+    #   continue
+    # df.to_csv('F:/Run/Output/balancesheet.csv',encoding='gbk' )
+
+
+import pandas as pd,numpy as np,os,csv
+
+path='F:/Run/dailydata'
+path2='F:/Run/Output/Statistic'
+if os.path.exists(path2+'/magicdata.csv')==True:
+   os.unlink(path2+'/magicdata.csv')
+
+files = os.listdir(path)  # 遍历该文件夹下所有文件
+for i,file in enumerate(files):
+    df = pd.read_csv(path + '/' + file, encoding='gbk', parse_dates=[2],index_col=[2])  # 读取每个文件进入dataframe,第三列交易日期解析日期， 并且设为行索引
+    df2 = df.sort_index(ascending=True)
+    stockcode = list(df2['股票代码'])[-1]
+    stockname = list(df2['股票名称'])[-1]
+    lowestprice=min(df['最低价'])
+    highestprice=max(df['最高价'])
+    newestprice=df.iat[-1,8]  #由于交易日期设为index,所以第9列为收盘价
+    multiple=newestprice//lowestprice   #取倍数
+    goldenfigure=[0,0.25,0.33,0.372,0.5,0.618,0.66,0.75,1]
+    newgoldenfigure=np.array(goldenfigure)+multiple       #根据当前价计算出适用的倍数系数
+    targetprice=(lowestprice*newgoldenfigure).tolist()      #根据百分比计算出当前的支撑位和压力位,
+    for b in range(len(targetprice)):
+        targetprice[b]=round(targetprice[b],2)
+    pricediff=round(highestprice - lowestprice)
+    targetprice2=(np.array(goldenfigure[0:])*pricediff+lowestprice).tolist()  #计算出历史最高价和最低价之间差异保留两位小数,保留两位小数
+    for b in range(len(targetprice2)):
+        targetprice2[b] = round(targetprice2[b], 2)
+
+    position=0 # 计算当前最新价在黄金数字序列1中的位置
+    for i in range(8):
+        if newestprice > targetprice[i] and newestprice > targetprice[i+1]:
+            position+= 1
+            if position < 8:
+               continue
+            else:
+               position+=1
+        elif newestprice >= targetprice[i] and  newestprice < targetprice[i+1]:
+            position=i+1
+            profit_percent=round((targetprice[i+1]-newestprice)/newestprice*100,2)  # 当前价距离压力位的盈利百分比
+            loss_percent=round((newestprice-targetprice[i])/newestprice*100,2) # 当前价距离支撑位的亏损百分比
+            break
+
+    position1=0 # 计算当前最新价在黄金数字序列2中的位置
+    for a in range(8):
+        if newestprice > targetprice2[a] and newestprice > targetprice2[a + 1]:
+            position1 += 1
+            if position1 < 8:
+                continue
+            else:
+                position1 += 1
+        elif newestprice >= targetprice2[a] and newestprice < targetprice2[a + 1]:
+            position1 = a + 1
+            break
+    header=['股票代码','股票名称','当日最新价','序列1位置','序列2位置','黄金数字序列1(0,0.25,0.33,0.372,0.5,0.618,0.66,0.75,1)','盈利百分比(％)','亏损百分比（％）','黄金数字序列2']
+    summary=[stockcode,stockname,newestprice,position,position1]
+    summary.append(targetprice)
+    summary.append(profit_percent)
+    summary.append(loss_percent)
+    summary.append(targetprice2)
+    if os.path.exists(path2+'/magicdata.csv') == True:  # 如果该股票文件存在,则打开此文件并添加该行
+        targetfile = open(path2+'/magicdata.csv', 'a', newline='', encoding='gbk')  # 以添加模式写入文件
+        targesinglefile = csv.writer(targetfile)
+        targesinglefile.writerow(summary)
+        targetfile.close()
+    else:  # 如果该股票文件不存在,则建立此文件写入header,并添加数据
+        targetfile = open(path2+'/magicdata.csv', 'w', newline='', encoding='gbk')  # 以覆盖模式写入文件
+        targesinglefile = csv.writer(targetfile)
+        targesinglefile.writerow(header)
+        targesinglefile.writerow(summary)
+        targetfile.close()
